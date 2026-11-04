@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block body_class %}app-page studio-page{% endblock %}
+{% block content %}
+<header class="app-topbar">
+  <a class="wordmark" href="/">Faceform<span>.</span></a>
+  <nav class="app-top-links"><a href="/gallery">Gallery</a><a href="/billing">Credits</a><a class="user-link" href="/login">Sign in</a></nav>
+</header>
+<main id="main" class="studio-layout wrap">
+  <section class="studio-intro">
+    <a class="back-link" href="/">← Back home</a>
+    <span class="eyebrow">The face studio</span>
+    <h1>Imagine someone <span class="accent">new.</span></h1>
+    <p>Every great campaign starts with a character. Tell us who you're imagining.</p>
+    <div class="studio-note"><span>✦</span><span>Every face is original, fictional and yours to use commercially.</span></div>
+  </section>
+  <section class="studio-workspace">
+    <div class="studio-form-card">
+      <div class="form-card-top"><div><span class="eyebrow">Create a character</span><h2>Your creative brief</h2></div><span class="credit-chip"><span>✦</span> <b id="studio-credit-count">6</b> credits / face</span></div>
+      <div class="stepper" aria-label="Form progress">
+        <div class="stepper-step active" data-step-indicator="1"><span>1</span><small>Persona</small></div><i></i>
+        <div class="stepper-step" data-step-indicator="2"><span>2</span><small>The details</small></div><i></i>
+        <div class="stepper-step" data-step-indicator="3"><span>3</span><small>Your faces</small></div>
+      </div>
+      <form id="generation-form">
+        <div class="form-step active" data-form-step="1">
+          <label class="field-label" for="generation-title">Give this character a name</label>
+          <input id="generation-title" name="title" type="text" maxlength="120" placeholder="e.g. The Sunday morning regular" required>
+          <div class="field-grid">
+            <label class="field-label">Gender presentation
+              <select name="gender" required><option value="" disabled selected>Choose one</option><option>Woman</option><option>Man</option><option>Non-binary</option><option>Androgynous</option></select>
+            </label>
+            <label class="field-label">Age range
+              <select name="age_range" required><option value="" disabled selected>Select age</option><option>18-24</option><option>25-34</option><option>35-44</option><option>45-54</option><option>55-64</option><option>65+</option></select>
+            </label>
+          </div>
+          <label class="field-label" for="generation-ethnicity">Ethnicity</label>
+          <select id="generation-ethnicity" name="ethnicity" required><option value="" disabled selected>Choose an ethnicity</option><option>Black / African</option><option>East African</option><option>South Asian</option><option>East Asian</option><option>Latino / Hispanic</option><option>Middle Eastern</option><option>White / European</option><option>Mixed heritage</option><option>Other</option></select>
+          <div class="form-actions"><span class="form-hint">Step 1 of 2 · Just the basics</span><button class="button button-primary" type="button" data-next-step="2">Add the details <span>→</span></button></div>
+        </div>
+        <div class="form-step" data-form-step="2">
+          <label class="field-label" for="generation-description">Bring their look to life</label>
+          <textarea id="generation-description" name="description" minlength="10" maxlength="2000" rows="5" placeholder="Tell us about their face, hair, eyes, expression, accessories, style or the mood you're after..." required></textarea>
+          <div class="textarea-foot"><span>Be as specific as you like</span><span id="description-count">0 / 2000</span></div>
+          <label class="field-label" for="image-count">How many variations?
+            <select id="image-count" name="number_of_images"><option value="1">1 face</option><option value="2">2 faces</option><option value="3">3 faces</option><option value="4">4 faces</option></select>
+          </label>
+          <div class="form-actions"><button class="button button-outline" type="button" data-prev-step="1">← Back</button><button class="button button-primary" type="button" data-next-step="3">Review your brief <span>→</span></button></div>
+        </div>
+        <div class="form-step" data-form-step="3">
+          <div class="review-card"><span class="review-icon">✧</span><div><span class="eyebrow">Ready when you are</span><h3 id="review-title">Your new character</h3><p id="review-summary"></p></div></div>
+          <div class="cost-row"><span>Generation cost</span><strong><span id="review-cost">6</span> credits</strong></div>
+          <div class="form-actions"><button class="button button-outline" type="button" data-prev-step="2">← Edit brief</button><button class="button button-primary" type="submit" id="generate-submit">Create my face <span>✦</span></button></div>
+          <p class="form-hint centered">By creating, you confirm this is a fictional person — not based on a real individual.</p>
+        </div>
+      </form>
+    </div>
+    <section class="generation-results" id="generation-results" hidden aria-live="polite">
+      <div class="results-heading"><div><span class="eyebrow">Made for you</span><h2>Your new faces</h2></div><a class="text-link" href="/gallery">Open gallery →</a></div>
+      <div class="result-grid" id="result-grid"></div>
+      <div class="guest-save-banner" id="guest-save-banner" hidden><div><strong>Keep these faces close.</strong><p>Create a free account to download and save your new characters.</p></div><a class="button button-primary" href="/register">Save my faces <span>↗</span></a></div>
+    </section>
+  </section>
+</main>
+{% endblock %}

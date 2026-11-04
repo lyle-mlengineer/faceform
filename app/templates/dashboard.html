@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block body_class %}app-page{% endblock %}
+{% block content %}
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="wordmark sidebar-logo" href="/">Faceform<span>.</span></a>
+    <div class="sidebar-label">WORKSPACE</div>
+    <nav class="sidebar-nav" aria-label="Workspace navigation">
+      <a class="side-link active" href="/dashboard"><span class="side-icon">⌂</span> Overview</a>
+      <a class="side-link" href="/product"><span class="side-icon">✧</span> Create a face</a>
+      <a class="side-link" href="/gallery"><span class="side-icon">▦</span> Gallery</a>
+      <a class="side-link" href="/billing"><span class="side-icon">◈</span> Credits &amp; billing</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-tip"><span>✦ A little inspiration</span><p>Try adding a setting or emotion to your next character's description.</p><a href="/product">Create a face →</a></div>
+      <button class="side-link logout-button" type="button" data-logout><span class="side-icon">↪</span> Sign out</button>
+    </div>
+  </aside>
+  <main class="dashboard-main" id="main">
+    <header class="dashboard-topbar"><button class="sidebar-toggle" type="button" aria-label="Toggle menu">☰</button><span class="breadcrumb">Workspace <span>/</span> Overview</span><a class="credit-pill" href="/billing"><span>✦</span><b id="topbar-credits">—</b> credits <span class="pill-plus">+</span></a></header>
+    <div class="dashboard-content">
+      <section class="welcome-row"><div><span class="eyebrow">YOUR CREATIVE SPACE</span><h1>Good to see you, <span id="welcome-name">creator</span><span class="accent">.</span></h1><p>Your next idea is just a face away.</p></div><a class="button button-primary" href="/product">Create a face <span>↗</span></a></section>
+      <section class="stats-grid" aria-label="Your account stats">
+        <article class="stat-card lavender-card"><span class="stat-label">Available credits <span>✦</span></span><strong id="stat-credits">—</strong><a href="/billing">Get more credits <span>→</span></a></article>
+        <article class="stat-card"><span class="stat-label">Faces created <span>✧</span></span><strong id="stat-images">—</strong><a href="/gallery">Explore your gallery <span>→</span></a></article>
+        <article class="stat-card"><span class="stat-label">Your albums <span>▦</span></span><strong id="stat-albums">—</strong><a href="/gallery">Organize your work <span>→</span></a></article>
+      </section>
+      <section class="dashboard-section">
+        <div class="section-heading compact-heading"><div><span class="eyebrow">FRESH FROM THE STUDIO</span><h2>Your recent faces</h2></div><a class="text-link" href="/gallery">View gallery <span>→</span></a></div>
+        <div class="dashboard-gallery" id="dashboard-gallery"><div class="loading-state">Getting your gallery ready…</div></div>
+      </section>
+      <section class="dashboard-section transactions-section">
+        <div class="section-heading compact-heading"><div><span class="eyebrow">THE PAPER TRAIL</span><h2>Recent activity</h2></div><a class="text-link" href="/billing">Billing history <span>→</span></a></div>
+        <div class="transaction-list" id="transaction-list"><div class="loading-state">Loading activity…</div></div>
+      </section>
+    </div>
+  </main>
+</div>
+{% endblock %}

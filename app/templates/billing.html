@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body_class %}app-page{% endblock %}
+{% block content %}
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="wordmark sidebar-logo" href="/">Faceform<span>.</span></a><div class="sidebar-label">WORKSPACE</div>
+    <nav class="sidebar-nav" aria-label="Workspace navigation"><a class="side-link" href="/dashboard"><span class="side-icon">⌂</span> Overview</a><a class="side-link" href="/product"><span class="side-icon">✧</span> Create a face</a><a class="side-link" href="/gallery"><span class="side-icon">▦</span> Gallery</a><a class="side-link active" href="/billing"><span class="side-icon">◈</span> Credits &amp; billing</a></nav>
+    <div class="sidebar-bottom"><div class="sidebar-tip"><span>✦ No subscriptions</span><p>Credits are yours to use whenever inspiration strikes.</p><a href="/product">Make something →</a></div><button class="side-link logout-button" type="button" data-logout><span class="side-icon">↪</span> Sign out</button></div>
+  </aside>
+  <main class="dashboard-main" id="main">
+    <header class="dashboard-topbar"><button class="sidebar-toggle" type="button" aria-label="Toggle menu">☰</button><span class="breadcrumb">Workspace <span>/</span> Credits &amp; billing</span><a class="credit-pill" href="#credit-packs"><span>✦</span><b id="topbar-credits">—</b> credits <span class="pill-plus">+</span></a></header>
+    <div class="dashboard-content billing-content">
+      <section class="welcome-row"><div><span class="eyebrow">FLEXIBLE BY DESIGN</span><h1>Good ideas don't <span class="accent">subscribe.</span></h1><p>One-time credit packs. No recurring charges. Pay with M-Pesa or card.</p></div></section>
+      <section class="billing-balance"><div class="balance-symbol">✦</div><div><span class="eyebrow">IN YOUR CREATIVE WALLET</span><strong><span id="billing-balance">—</span> <small>credits</small></strong><p>Each face costs <b id="billing-cost">6</b> credits. Your credits never expire.</p></div><a class="button button-outline" href="/product">Create a face <span>↗</span></a></section>
+      <section class="billing-section" id="credit-packs"><div class="section-heading compact-heading"><div><span class="eyebrow">PICK YOUR PACE</span><h2>Credit packs</h2><p class="section-subtitle">A little spark or a whole studio. The choice is yours.</p></div><span class="kes-tag">Prices in KES</span></div><div class="pricing-grid" id="pricing-grid"><div class="loading-state">Loading available packs…</div></div></section>
+      <section class="billing-section payment-history"><div class="section-heading compact-heading"><div><span class="eyebrow">EVERYTHING IN ITS PLACE</span><h2>Payment history</h2></div></div><div class="payment-list" id="payment-list"><div class="loading-state">Loading payment history…</div></div></section>
+      <p class="billing-footnote">All transactions are processed securely. M-Pesa payments are confirmed before credits are added to your account.</p>
+    </div>
+  </main>
+</div>
+<dialog class="modal payment-modal" id="payment-modal"><form id="payment-form"><div class="modal-heading"><div><span class="eyebrow">A little more creative fuel</span><h2>Choose how to pay</h2></div><button class="icon-button" type="button" data-close-payment aria-label="Close">×</button></div><input type="hidden" name="pack_code"><div class="payment-order" id="payment-order"></div><label class="field-label">Payment method<select name="method" id="payment-method" required><option value="mpesa_stk">M-Pesa · STK push</option><option value="mpesa_paybill">M-Pesa · Paybill</option><option value="mpesa_till">M-Pesa · Till</option><option value="mpesa_qr">M-Pesa · Scan QR</option><option value="card">Credit or debit card</option></select></label><label class="field-label phone-field" id="phone-field">M-Pesa phone number<input name="phone_number" type="tel" autocomplete="tel" placeholder="0712 345 678"></label><button class="button button-primary modal-submit" id="payment-submit" type="submit">Continue to payment <span>→</span></button><div class="payment-instructions" id="payment-instructions" hidden aria-live="polite"></div></form></dialog>
+{% endblock %}

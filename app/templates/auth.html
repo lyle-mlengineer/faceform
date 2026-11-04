@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<main id="main" class="auth-shell">
+  <a class="wordmark auth-logo" href="/">Faceform<span>.</span></a>
+  <a class="back-link auth-back" href="/">← Back home</a>
+  <div class="auth-layout">
+    <section class="auth-art">
+      <div class="auth-art-copy"><span class="eyebrow">A world of original characters</span><h1>People that<br>only <span class="accent">you</span> imagined.</h1><p>Build your own cast of photoreal people. Made for your ideas, your stories, your next big thing.</p></div>
+      <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&amp;fit=crop&amp;w=900&amp;q=85" alt="Smiling portrait in warm natural light">
+      <span class="auth-art-caption">Your imagination, in full colour.</span>
+    </section>
+    <section class="auth-form-wrap">
+      <div class="auth-form-heading">
+        <span class="eyebrow">{{ "Already part of the story?" if auth_mode == "login" else "Your next idea is waiting" }}</span>
+        <h2>{{ "Welcome back." if auth_mode == "login" else "Create your account." }}</h2>
+        <p>{{ "Sign in to pick up where you left off." if auth_mode == "login" else "Save your faces, build collections and get creating." }}</p>
+      </div>
+      <button class="google-button" type="button" id="google-login"><span class="google-g">G</span> Continue with Google</button>
+      <div class="or-divider"><span>or with email</span></div>
+      <form id="auth-form" data-auth-mode="{{ auth_mode }}">
+        {% if auth_mode == "register" %}
+        <label class="field-label" for="auth-name">Your name</label>
+        <input id="auth-name" name="name" autocomplete="name" placeholder="What should we call you?" required maxlength="120">
+        {% endif %}
+        <label class="field-label" for="auth-email">Email address</label>
+        <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <label class="field-label" for="auth-password">Password</label>
+        <div class="password-field"><input id="auth-password" name="password" type="password" autocomplete="{{ 'current-password' if auth_mode == 'login' else 'new-password' }}" placeholder="At least 10 characters" required minlength="{{ 1 if auth_mode == 'login' else 10 }}"><button type="button" class="password-toggle" aria-label="Show password">Show</button></div>
+        <button class="button button-primary auth-submit" id="auth-submit" type="submit">{{ "Sign in" if auth_mode == "login" else "Create my account" }} <span>→</span></button>
+      </form>
+      <p class="auth-switch">{{ "New to Faceform?" if auth_mode == "login" else "Already have an account?" }} <a href="{{ '/register' if auth_mode == 'login' else '/login' }}">{{ "Create an account" if auth_mode == "login" else "Sign in" }}</a></p>
+      <p class="auth-terms">By continuing, you agree to our Terms of Service and Privacy Policy.</p>
+    </section>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', path='/js/auth.js') }}"></script>{% endblock %}

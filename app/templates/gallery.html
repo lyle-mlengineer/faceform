@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block body_class %}app-page{% endblock %}
+{% block content %}
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="wordmark sidebar-logo" href="/">Faceform<span>.</span></a>
+    <div class="sidebar-label">WORKSPACE</div>
+    <nav class="sidebar-nav" aria-label="Workspace navigation">
+      <a class="side-link" href="/dashboard"><span class="side-icon">⌂</span> Overview</a>
+      <a class="side-link" href="/product"><span class="side-icon">✧</span> Create a face</a>
+      <a class="side-link active" href="/gallery"><span class="side-icon">▦</span> Gallery</a>
+      <a class="side-link" href="/billing"><span class="side-icon">◈</span> Credits &amp; billing</a>
+    </nav>
+    <div class="sidebar-bottom"><div class="sidebar-tip"><span>✦ Keep it organized</span><p>Albums make it easy to find the perfect face for each campaign.</p><button class="text-button" type="button" data-create-album>Create an album →</button></div><button class="side-link logout-button" type="button" data-logout><span class="side-icon">↪</span> Sign out</button></div>
+  </aside>
+  <main class="dashboard-main" id="main">
+    <header class="dashboard-topbar"><button class="sidebar-toggle" type="button" aria-label="Toggle menu">☰</button><span class="breadcrumb">Workspace <span>/</span> Gallery</span><a class="credit-pill" href="/billing"><span>✦</span><b id="topbar-credits">—</b> credits <span class="pill-plus">+</span></a></header>
+    <div class="dashboard-content">
+      <section class="welcome-row gallery-welcome"><div><span class="eyebrow">YOUR COLLECTION</span><h1>Faces with a place <span class="accent">to be.</span></h1><p>Every original character you've created, all in one place.</p></div><a class="button button-primary" href="/product">Create a face <span>↗</span></a></section>
+      <section class="album-section"><div class="section-heading compact-heading"><div><span class="eyebrow">SORTED YOUR WAY</span><h2>Your albums</h2></div><button class="button button-outline button-small" type="button" data-create-album>＋ New album</button></div><div class="album-list" id="album-list"><div class="loading-state">Loading your albums…</div></div></section>
+      <section class="gallery-section"><div class="section-heading compact-heading gallery-heading"><div><span class="eyebrow">THE WHOLE CAST</span><h2 id="gallery-title">All faces</h2></div><div class="gallery-controls"><label class="search-box"><span>⌕</span><input id="gallery-search" type="search" placeholder="Find a face..." aria-label="Search faces"></label><select id="gallery-sort" aria-label="Sort faces"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Name A–Z</option></select></div></div><div class="gallery-grid" id="gallery-grid"><div class="loading-state">Loading your faces…</div></div></section>
+    </div>
+  </main>
+</div>
+<dialog class="modal" id="album-modal"><form method="dialog" id="album-form"><div class="modal-heading"><div><span class="eyebrow">A place for your ideas</span><h2 id="album-modal-title">New album</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div><input type="hidden" name="album_id"><label class="field-label">Album title<input name="title" required maxlength="120" placeholder="e.g. Summer campaign"></label><label class="field-label">A little about it<textarea name="description" rows="3" maxlength="2000" placeholder="What are you collecting these faces for?"></textarea></label><div class="modal-actions"><button class="button button-outline" value="cancel">Cancel</button><button class="button button-primary" id="album-save" type="submit">Save album <span>→</span></button></div></form></dialog>
+{% endblock %}
