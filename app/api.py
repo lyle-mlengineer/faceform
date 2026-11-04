@@ -446,7 +446,9 @@ async def regenerate_generation(
         raise
 
     try:
-        urls = await generate_images(settings, generation_prompt(generation), 1)
+        provider = request.app.state.image_provider
+        urls = await provider.generate_images(generation_prompt(generation), generation.image_count)
+        urls = [request.url_for("images", path=f"{image}").__str__() for image in urls]
         event = FaceGeneration(id=generation.id, image_count=1).complete(
             urls,
             variation_number=generation.image_count + 1,
