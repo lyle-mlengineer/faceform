@@ -326,6 +326,7 @@
     if (!grid) return;
     if (!requireAuth()) return;
     const albumsContainer = document.getElementById("album-list");
+    let creditsPerImage = 6;
     let images = [];
     let albums = [];
     let activeAlbum = "";
@@ -350,7 +351,7 @@
             <p class="gallery-card-date">${formatDate(image.created_at)}</p>
             <div class="gallery-card-actions">
               <a href="${window.FACEFORM.apiBase}/images/${encodeURIComponent(image.id)}/download" data-download="${escapeHtml(image.id)}">Download</a>
-              <button type="button" data-rename="${escapeHtml(image.id)}">Edit</button>
+              <button type="button" data-edit-image="${escapeHtml(image.id)}">Edit</button>
               <button type="button" data-assign="${escapeHtml(image.id)}" aria-label="Add to album">Album</button>
               <button class="danger-action" type="button" data-delete-image="${escapeHtml(image.id)}">Delete</button>
             </div>
@@ -370,7 +371,11 @@
       [albums] = await Promise.all([api("/albums")]);
       await loadImages();
       const credits = await api("/dashboard");
+      creditsPerImage = credits.credits_per_image;
       document.getElementById("topbar-credits").textContent = credits.credits;
+      document.getElementById("edit-face-cost").textContent = credits.credit_checks_disabled
+        ? "Regeneration adds a new face. Credit checks are disabled on this account."
+        : `Regeneration adds a new face to your gallery and costs ${creditsPerImage} credits.`;
       renderAlbums();
     } catch (error) {
       toast(error.message, "error");
@@ -378,6 +383,50 @@
 
     document.getElementById("gallery-search").addEventListener("input", renderImages);
     document.getElementById("gallery-sort").addEventListener("change", renderImages);
+    const editFaceDialog = document.getElementById("edit-face-modal");
+    const editFaceForm = document.getElementById("edit-face-form");
+    const editFaceLoading = document.getElementById("edit-face-loading");
+    const regenerateFaceButton = document.getElementById("regenerate-face");
+    let editFaceRequest = 0;
+    const openEditFaceDialog = async (image) => {
+      const requestId = ++editFaceRequest;
+      const preview = document.getElementById("edit-face-image");
+      preview.src = image.url;
+      preview.alt = image.title;
+      editFaceForm.hidden = true;
+      editFaceLoading.hidden = false;
+      editFaceLoading.textContent = "Loading this face's creative brief…";
+      editFaceDialog.dataset.imageId = image.id;
+      editFaceDialog.dataset.generationId = image.generation_id;
+      editFaceDialog.showModal();
+      try {
+        const generation = await api(`/generations/${encodeURIComponent(image.generation_id)}`);
+        if (requestId !== editFaceRequest) return;
+        editFaceForm.elements.title.value = generation.title;
+        ["gender", "age_range", "ethnicity"].forEach((name) => {
+          const field = editFaceForm.elements[name];
+          if (![...field.options].some((option) => option.value === generation[name])) {
+            const option = document.createElement("option");
+            option.value = generation[name];
+            option.textContent = generation[name];
+            field.add(option);
+          }
+          field.value = generation[name];
+        });
+        editFaceForm.elements.description.value = generation.description;
+        editFaceDialog.dataset.originalTitle = generation.title;
+        editFaceLoading.hidden = true;
+        editFaceForm.hidden = false;
+      } catch (error) {
+        if (requestId !== editFaceRequest) return;
+        editFaceLoading.textContent = `Could not load this face's creative brief: ${error.message}`;
+        toast(error.message, "error");
+      }
+    };
+    editFaceDialog.addEventListener("close", () => { editFaceRequest += 1; });
+    editFaceDialog.querySelectorAll("[data-close-edit-face]").forEach((button) => {
+      button.addEventListener("click", () => editFaceDialog.close());
+    });
     albumsContainer.addEventListener("click", async (event) => {
       const filter = event.target.closest("[data-album-filter]");
       if (filter) {
@@ -400,16 +449,10 @@
         if (image) await downloadImage(image.id, image.title);
         return;
       }
-      const rename = event.target.closest("[data-rename]");
-      if (rename) {
-        const image = images.find((item) => item.id === rename.dataset.rename);
-        const title = window.prompt("Give this face a new name", image?.title || "");
-        if (!title?.trim()) return;
-        try {
-          await api(`/images/${encodeURIComponent(image.id)}`, { method: "PATCH", body: JSON.stringify({ title: title.trim() }) });
-          await loadImages();
-          toast("Face name updated.", "success");
-        } catch (error) { toast(error.message, "error"); }
+      const edit = event.target.closest("[data-edit-image]");
+      if (edit) {
+        const image = images.find((item) => item.id === edit.dataset.editImage);
+        if (image) await openEditFaceDialog(image);
         return;
       }
       const assign = event.target.closest("[data-assign]");
@@ -460,6 +503,49 @@
       finally {
         confirmDeleteImage.disabled = false;
         delete deleteImageDialog.dataset.imageId;
+      }
+    });
+
+    editFaceForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const imageId = editFaceDialog.dataset.imageId;
+      const generationId = editFaceDialog.dataset.generationId;
+      if (!imageId || !generationId) return;
+      const data = new FormData(editFaceForm);
+      const payload = {
+        title: data.get("title").trim(),
+        gender: data.get("gender"),
+        age_range: data.get("age_range"),
+        ethnicity: data.get("ethnicity"),
+        description: data.get("description").trim(),
+      };
+      setBusy(regenerateFaceButton, true, "Regenerating face…");
+      try {
+        await api(`/generations/${encodeURIComponent(generationId)}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+        const image = images.find((item) => item.id === imageId);
+        const originalTitle = editFaceDialog.dataset.originalTitle;
+        if (image && payload.title !== originalTitle) {
+          const suffix = image.title.startsWith(originalTitle) ? image.title.slice(originalTitle.length) : "";
+          await api(`/images/${encodeURIComponent(imageId)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ title: `${payload.title}${suffix}` }),
+          });
+        }
+        await api(`/generations/${encodeURIComponent(generationId)}/regenerate`, { method: "POST" });
+        editFaceDialog.close();
+        await loadImages();
+        albums = await api("/albums");
+        renderAlbums();
+        const dashboard = await api("/dashboard");
+        document.getElementById("topbar-credits").textContent = dashboard.credits;
+        toast("Your updated face is ready.", "success");
+      } catch (error) {
+        toast(error.message, "error");
+      } finally {
+        setBusy(regenerateFaceButton, false);
       }
     });
 

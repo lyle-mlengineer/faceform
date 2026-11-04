@@ -25,4 +25,22 @@
 <dialog class="modal" id="album-modal"><form method="dialog" id="album-form"><div class="modal-heading"><div><span class="eyebrow">A place for your ideas</span><h2 id="album-modal-title">New album</h2></div><button class="icon-button" type="button" data-close-album aria-label="Close">×</button></div><input type="hidden" name="album_id"><label class="field-label">Album title<input name="title" required maxlength="120" placeholder="e.g. Summer campaign"></label><label class="field-label">A little about it<textarea name="description" rows="3" maxlength="2000" placeholder="What are you collecting these faces for?"></textarea></label><div class="modal-actions"><button class="button button-outline" type="button" data-close-album>Cancel</button><button class="button button-primary" id="album-save" type="submit">Save album <span>→</span></button></div></form></dialog>
 <dialog class="modal" id="delete-image-modal" aria-labelledby="delete-image-title"><form method="dialog"><div class="modal-heading"><div><span class="eyebrow">A moment to check</span><h2 id="delete-image-title">Delete this face?</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div><p class="confirm-copy">This face will be permanently removed from your gallery. This action can't be undone.</p><div class="modal-actions"><button class="button button-outline" value="cancel">Cancel</button><button class="button button-danger" id="confirm-delete-image" type="button">Delete face</button></div></form></dialog>
 <dialog class="modal" id="assign-image-modal" aria-labelledby="assign-image-title"><form id="assign-image-form"><div class="modal-heading"><div><span class="eyebrow">Keep things organized</span><h2 id="assign-image-title">Add face to album</h2></div><button class="icon-button" type="button" data-close-assign aria-label="Close">×</button></div><label class="field-label" for="assign-image-album">Choose an album<select id="assign-image-album" name="album_id" required></select></label><div class="modal-actions"><button class="button button-outline" type="button" data-close-assign>Cancel</button><button class="button button-primary" id="confirm-assign-image" type="submit">Add to album <span>→</span></button></div></form></dialog>
+<dialog class="modal edit-face-modal" id="edit-face-modal" aria-labelledby="edit-face-title">
+  <div class="modal-heading"><div><span class="eyebrow">Refine your character</span><h2 id="edit-face-title">Edit this face</h2></div><button class="icon-button" type="button" data-close-edit-face aria-label="Close">×</button></div>
+  <p class="form-hint" id="edit-face-loading">Loading this face's creative brief…</p>
+  <div class="edit-face-layout">
+    <div class="edit-face-preview"><img id="edit-face-image" alt=""></div>
+    <form id="edit-face-form" hidden>
+      <label class="field-label" for="edit-face-name">Character name<input id="edit-face-name" name="title" type="text" maxlength="120" required></label>
+      <div class="field-grid">
+        <label class="field-label">Gender presentation<select name="gender" required><option>Woman</option><option>Man</option><option>Non-binary</option><option>Androgynous</option></select></label>
+        <label class="field-label">Age range<select name="age_range" required><option>18-24</option><option>25-34</option><option>35-44</option><option>45-54</option><option>55-64</option><option>65+</option></select></label>
+      </div>
+      <label class="field-label">Ethnicity<select name="ethnicity" required><option>Black / African</option><option>East African</option><option>South Asian</option><option>East Asian</option><option>Latino / Hispanic</option><option>Middle Eastern</option><option>White / European</option><option>Mixed heritage</option><option>Other</option></select></label>
+      <label class="field-label">Appearance and style<textarea name="description" minlength="10" maxlength="2000" rows="4" required></textarea></label>
+      <p class="form-hint edit-face-cost" id="edit-face-cost"></p>
+      <div class="modal-actions"><button class="button button-outline" type="button" data-close-edit-face>Cancel</button><button class="button button-primary" id="regenerate-face" type="submit">Regenerate face <span>✦</span></button></div>
+    </form>
+  </div>
+</dialog>
 {% endblock %}

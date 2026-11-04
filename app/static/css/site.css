@@ -333,8 +333,15 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .payment-status.failed { background: #faeded; color: #ad6464; }
 .billing-footnote { margin-top: 20px; color: #99949f; font-size: 9px; line-height: 1.6; }
 .modal { width: min(440px, calc(100% - 30px)); max-height: min(90vh, 760px); padding: 27px; border: 1px solid #eae7ed; border-radius: 19px; background: white; color: var(--ink); box-shadow: 0 25px 85px #30283b35; }
+.edit-face-modal { width: min(780px, calc(100% - 30px)); }
 .modal::backdrop { background: rgba(34,30,39,.42); backdrop-filter: blur(3px); }
 .modal form { display: grid; }
+.edit-face-layout form[hidden] { display: none; }
+.edit-face-layout { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 22px; }
+.edit-face-preview img { width: 100%; aspect-ratio: .82; border-radius: 12px; background: #efebf5; object-fit: cover; }
+.edit-face-layout .field-label { margin-bottom: 12px; }
+.edit-face-layout textarea { min-height: 100px; }
+.edit-face-cost { margin: 0 0 14px; line-height: 1.5; }
 .modal-heading { display: flex; align-items: start; justify-content: space-between; gap: 15px; margin-bottom: 23px; }
 .modal-heading h2 { margin-top: 5px; font-size: 23px; letter-spacing: -.045em; }
 .icon-button { width: 31px; height: 31px; border: 0; border-radius: 50%; background: #f4f2f5; color: #807b85; font-size: 20px; cursor: pointer; }
@@ -506,6 +513,9 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
   .gallery-card-body { padding: 9px; }
   .gallery-card-actions { gap: 4px; }
   .gallery-card-actions button, .gallery-card-actions a { font-size: 8px; }
+  .edit-face-layout { grid-template-columns: 1fr; gap: 15px; }
+  .edit-face-preview img { max-height: 240px; aspect-ratio: 1.4; }
+  .edit-face-layout .field-grid { grid-template-columns: 1fr; gap: 0; }
   .billing-content > .welcome-row { margin-bottom: 21px; }
   .billing-balance { align-items: start; flex-wrap: wrap; gap: 11px; padding: 17px; }
   .billing-balance > div:nth-child(2) { min-width: calc(100% - 60px); }
