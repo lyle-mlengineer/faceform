@@ -44,3 +44,5 @@ M-Pesa callbacks and Stripe webhooks are idempotent: a payment grants credits on
 | Dashboard | `GET /dashboard` |
 
 Guests can generate one image and receive a signed guest token. Send that token as `guest_token` when registering or signing in to claim the generation and make its download available to the account. Authenticated generation costs `CREDITS_PER_IMAGE` credits per requested image; failed provider requests are refunded.
+
+Credit checks and debits are disabled by default in `development` so authenticated users can test generation without purchasing credits. Set `DISABLE_CREDIT_CHECKS=false` to test billing enforcement. The bypass is ignored unless `ENVIRONMENT=development`; set `ENVIRONMENT=production` to enforce credits in production.

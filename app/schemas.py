@@ -187,6 +187,7 @@ class CreditTransactionResponse(BaseModel):
 class DashboardResponse(BaseModel):
     credits: int
     credits_per_image: int
+    credit_checks_disabled: bool
     generations_count: int
     images_count: int
     albums_count: int

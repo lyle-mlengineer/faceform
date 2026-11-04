@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     access_token_minutes: int = 60
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
     credits_per_image: int = 6
+    disable_credit_checks: bool = True
     credit_packs: list[dict[str, int | str]] = [
         {"code": "starter", "credits": 60, "amount_kes": 500},
         {"code": "creator", "credits": 150, "amount_kes": 1000},
@@ -44,6 +45,10 @@ class Settings(BaseSettings):
     stripe_success_url: str = "http://localhost:3000/billing/success"
     stripe_cancel_url: str = "http://localhost:3000/billing"
     payment_webhook_secret: str | None = None
+
+    @property
+    def credit_checks_disabled(self) -> bool:
+        return self.disable_credit_checks and self.environment.casefold() == "development"
 
 
 @lru_cache

@@ -17,6 +17,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     settings = Settings(
         _env_file=None,
         jwt_secret="test-secret-that-is-long-enough-for-local-tests",
+        disable_credit_checks=False,
         mpesa_consumer_key="consumer",
         mpesa_consumer_secret="secret",
         mpesa_shortcode="123456",
@@ -160,6 +161,36 @@ def test_manual_mpesa_payment_is_idempotent_and_generation_debits_credits(client
     assert revised.json()["image_count"] == 2
     assert len(revised.json()["images"]) == 2
     assert client.get("/api/v1/dashboard", headers=headers).json()["credits"] == 48
+
+
+def test_credit_checks_can_be_disabled_only_in_development(client: TestClient) -> None:
+    account = register(client)
+    headers = {"Authorization": f"Bearer {account['access_token']}"}
+    request = {
+        "title": "Development portrait",
+        "gender": "woman",
+        "age_range": "25-34",
+        "ethnicity": "East African",
+        "description": "Natural portrait lighting and a friendly expression.",
+    }
+
+    client.app.state.settings.disable_credit_checks = True
+    generated = client.post("/api/v1/generations", headers=headers, json=request)
+    assert generated.status_code == 201, generated.text
+    assert generated.json()["credits_charged"] == 0
+    generation_id = generated.json()["generation"]["id"]
+
+    regenerated = client.post(f"/api/v1/generations/{generation_id}/regenerate", headers=headers)
+    assert regenerated.status_code == 200, regenerated.text
+    dashboard = client.get("/api/v1/dashboard", headers=headers).json()
+    assert dashboard["credits"] == 0
+    assert dashboard["credit_checks_disabled"] is True
+    assert dashboard["recent_transactions"] == []
+
+    client.app.state.settings.environment = "production"
+    blocked = client.post("/api/v1/generations", headers=headers, json=request)
+    assert blocked.status_code == 402
+    assert client.get("/api/v1/dashboard", headers=headers).json()["credit_checks_disabled"] is False
 
 
 def test_failed_generation_refunds_credits(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:

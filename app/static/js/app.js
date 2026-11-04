@@ -215,7 +215,7 @@
       if (getToken()) {
         try {
           const dashboard = await api("/dashboard");
-          if (dashboard.credits < total) {
+          if (!dashboard.credit_checks_disabled && dashboard.credits < total) {
             toast(`You need ${total} credits. Add credits to keep creating.`, "error");
             return;
           }

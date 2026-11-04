@@ -12,3 +12,6 @@ firebase-admin>=6.6,<8
 stripe>=11,<13
 qrcode[pil]>=8,<9
 pytest>=8.3,<9
+google-genai 
+pillow
+openai

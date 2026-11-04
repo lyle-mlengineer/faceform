@@ -18,6 +18,14 @@ class ProviderRequestError(RuntimeError):
     pass
 
 
+class Provider:
+    def __init__(self, settings: Settings) -> None:
+        self.settings = settings
+
+    def generate_images(self, prompt: str, count: int) -> list[str]:
+        ...
+
+
 async def generate_images(settings: Settings, prompt: str, count: int) -> list[str]:
     if not settings.image_generation_api_url or not settings.image_generation_api_key:
         raise ProviderConfigurationError(

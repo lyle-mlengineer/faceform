@@ -147,7 +147,15 @@ def generation_prompt(generation: Generation) -> str:
     )
 
 
-def debit_user_credits(db: Session, user: User, amount: int, generation_id: str) -> None:
+def debit_user_credits(
+    db: Session,
+    user: User,
+    amount: int,
+    generation_id: str,
+    disable_credit_checks: bool,
+) -> int:
+    if disable_credit_checks:
+        return 0
     if user.credits < amount:
         raise HTTPException(
             status_code=402,
@@ -167,6 +175,7 @@ def debit_user_credits(db: Session, user: User, amount: int, generation_id: str)
             detail=f"Not enough credits. This action requires {amount} credits.",
         )
     publish_domain_event(db, event)
+    return amount
 
 
 def pack_for(settings: Settings, code: str) -> dict[str, Any]:
@@ -326,8 +335,10 @@ async def create_generation(
         db.add(generation)
         db.flush()
         if user:
-            charged = body.number_of_images * settings.credits_per_image
-            debit_user_credits(db, user, charged, generation.id)
+            amount = body.number_of_images * settings.credits_per_image
+            charged = debit_user_credits(
+                db, user, amount, generation.id, settings.credit_checks_disabled
+            )
         db.commit()
     except IntegrityError as exc:
         db.rollback()
@@ -364,7 +375,10 @@ async def create_generation(
         if isinstance(exc, ProviderConfigurationError):
             raise HTTPException(status_code=503, detail=str(exc)) from exc
         logger.exception("Face generation failed for generation %s", generation.id if generation else "unknown")
-        raise HTTPException(status_code=502, detail="The image provider failed to complete this generation. Credits were refunded.") from exc
+        detail = "The image provider failed to complete this generation."
+        if charged:
+            detail += " Credits were refunded."
+        raise HTTPException(status_code=502, detail=detail) from exc
 
     result_generation = db.scalar(
         select(Generation).options(selectinload(Generation.images)).where(Generation.id == generation.id)
@@ -418,9 +432,11 @@ async def regenerate_generation(
     if generation.status == "processing":
         raise HTTPException(status_code=409, detail="This generation is already being processed.")
 
-    charge = settings.credits_per_image
+    charge = 0
     try:
-        debit_user_credits(db, user, charge, generation.id)
+        charge = debit_user_credits(
+            db, user, settings.credits_per_image, generation.id, settings.credit_checks_disabled
+        )
         generation.status = "processing"
         db.commit()
     except HTTPException:
@@ -442,20 +458,24 @@ async def regenerate_generation(
         if generation is not None:
             generation.status = "completed" if generation.image_count else "failed"
             generation.error_message = str(exc)[:1000]
-            publish_domain_event(
-                db,
-                CreditsRefunded(
-                    occurred_at=event_time(),
-                    user_id=user.id,
-                    amount=charge,
-                    generation_id=generation.id,
-                ),
-            )
+            if charge:
+                publish_domain_event(
+                    db,
+                    CreditsRefunded(
+                        occurred_at=event_time(),
+                        user_id=user.id,
+                        amount=charge,
+                        generation_id=generation.id,
+                    ),
+                )
             db.commit()
         if isinstance(exc, ProviderConfigurationError):
             raise HTTPException(status_code=503, detail=str(exc)) from exc
         logger.exception("Face regeneration failed for generation %s", generation_id)
-        raise HTTPException(status_code=502, detail="The image provider failed to complete this edit. Credits were refunded.") from exc
+        detail = "The image provider failed to complete this edit."
+        if charge:
+            detail += " Credits were refunded."
+        raise HTTPException(status_code=502, detail=detail) from exc
 
     result_generation = db.scalar(
         select(Generation).options(selectinload(Generation.images)).where(Generation.id == generation_id)
@@ -957,6 +977,7 @@ def dashboard(
     return DashboardResponse(
         credits=user.credits,
         credits_per_image=settings_for(request).credits_per_image,
+        credit_checks_disabled=settings_for(request).credit_checks_disabled,
         generations_count=generations_count,
         images_count=images_count,
         albums_count=albums_count,
