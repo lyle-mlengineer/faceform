@@ -6,6 +6,10 @@ from typing import Any
 
 import httpx
 import qrcode
+from PIL import Image
+from io import BytesIO
+from pathlib import Path
+from uuid import uuid4
 
 from app.config import Settings
 
@@ -19,12 +23,50 @@ class ProviderRequestError(RuntimeError):
 
 
 class Provider:
-    def __init__(self, settings: Settings) -> None:
-        self.settings = settings
-
     def generate_images(self, prompt: str, count: int) -> list[str]:
         ...
 
+class ProviderAsync:
+    async def generate_images(self, prompt: str, count: int) -> list[str]:
+        ...
+
+class NVIDIAProvider(ProviderAsync):
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.invoke_url = "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux-3-image-klein"
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Accept": "application/json",
+        }
+
+    async def generate_images(self, prompt: str, count: int) -> list[str]:
+        payload = {
+            "prompt": prompt,
+            "width": 1024,
+            "height": 1024,
+            "seed": 0,
+            "steps": 50
+        }
+
+        async with httpx.AsyncClient(timeout=180) as client:
+            response = await client.post(
+                self.invoke_url,
+                headers=self.headers,
+                json=payload
+            )
+            response.raise_for_status()
+            body = response.json()
+
+        base64_image_data = body["artifacts"][0]["base64"]
+        image_bytes = base64.b64decode(base64_image_data)
+        image = Image.open(BytesIO(image_bytes))
+        temp_id: str = str(uuid4())
+        parent_dir = Path(__file__).parent
+        file_name = f"{temp_id}.png"
+        output_path = parent_dir / "images" / file_name
+        
+        image.save(output_path)
+        return [file_name]
 
 async def generate_images(settings: Settings, prompt: str, count: int) -> list[str]:
     if not settings.image_generation_api_url or not settings.image_generation_api_key:
@@ -58,6 +100,11 @@ async def generate_images(settings: Settings, prompt: str, count: int) -> list[s
     if len(urls) != count or any(not isinstance(url, str) or not url.startswith(("https://", "http://")) for url in urls):
         raise ProviderRequestError("Image provider response must contain one hosted image URL per requested image.")
     return urls
+
+def provider_from_settings(settings: Settings) -> ProviderAsync | None:
+    # Check for NVIDIA API key first
+    if hasattr(settings, 'nvidia_api_key') and settings.nvidia_api_key:
+        return NVIDIAProvider(settings.nvidia_api_key.get_secret_value())
 
 
 def mpesa_base_url(settings: Settings) -> str:

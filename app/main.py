@@ -13,6 +13,7 @@ from app.api import router
 from app.config import Settings, get_settings
 from app.database import Base, build_engine, get_db
 from app import models  # noqa: F401
+from app.providers import ProviderAsync, provider_from_settings
 
 APP_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
@@ -32,7 +33,9 @@ def create_app(settings: Settings | None = None, database_url: str | None = None
     app = FastAPI(title=app_settings.app_name, version="1.0.0", lifespan=lifespan)
     app.state.settings = app_settings
     app.state.engine = app_engine
+    app.state.image_provider = provider_from_settings(app_settings)
     app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
+    app.mount("/images", StaticFiles(directory=str(APP_DIR / "images")), name="images")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=app_settings.cors_origins,

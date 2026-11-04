@@ -17,8 +17,10 @@ headers = {
     "Accept": "application/json",
 }
 
+prompt = """A clean professional corporate headshot of a confident businesswoman with curly hair, warm natural lighting, a gentle smile, shot on a DSLR, crisp focus, neutral gray studio backdrop"""
+
 payload = {
-    "prompt": "A candid photograph from the wings of a theater, looking out at ballet dancers performing Swan Lake. Dark, blurred onlookers fill the foreground; on stage, ballerinas in white tutus are caught mid-motion under a strong central spotlight. Deep blacks, shadowy purples, and stark white. Grainy mid-20th-century color film, shallow depth of field.",
+    "prompt": prompt,
     "width": 1024,
     "height": 1024,
     "seed": 0,

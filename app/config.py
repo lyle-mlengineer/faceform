@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr
 
 
 class Settings(BaseSettings):
@@ -25,6 +26,7 @@ class Settings(BaseSettings):
     image_generation_api_url: str | None = None
     image_generation_api_key: str | None = None
     image_generation_model: str | None = None
+    nvidia_api_key: SecretStr | None = None
 
     firebase_credentials: str | None = None
     firebase_web_api_key: str | None = None

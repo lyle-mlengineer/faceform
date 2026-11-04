@@ -349,7 +349,9 @@ async def create_generation(
 
     domain_generation = FaceGeneration(id=generation.id, image_count=generation.image_count)
     try:
-        urls = await generate_images(settings, generation_prompt(generation), generation.image_count)
+        provider = request.app.state.image_provider
+        urls = await provider.generate_images(generation_prompt(generation), generation.image_count)
+        urls = [request.url_for("images", path=f"{image}.png").__str__() for image in urls]
         event = domain_generation.complete(urls)
         publish_domain_event(db, event)
         db.commit()
