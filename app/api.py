@@ -351,7 +351,7 @@ async def create_generation(
     try:
         provider = request.app.state.image_provider
         urls = await provider.generate_images(generation_prompt(generation), generation.image_count)
-        urls = [request.url_for("images", path=f"{image}.png").__str__() for image in urls]
+        urls = [request.url_for("images", path=f"{image}").__str__() for image in urls]
         event = domain_generation.complete(urls)
         publish_domain_event(db, event)
         db.commit()

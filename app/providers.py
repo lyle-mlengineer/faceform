@@ -64,7 +64,7 @@ class NVIDIAProvider(ProviderAsync):
         parent_dir = Path(__file__).parent
         file_name = f"{temp_id}.png"
         output_path = parent_dir / "images" / file_name
-        
+        print(f"Saving generated image to {output_path}")
         image.save(output_path)
         return [file_name]
 
