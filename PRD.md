@@ -13,6 +13,8 @@ These are then used to generate the faces
 
 The user should be able to browse the generated faces in the face gallery. They can organize the faces into albums for different use cases. They should be able to edit, download and delete both the faces and the albums. The albums each have a title and description.
 
+The application should also provide a public starter-face gallery of pre-generated examples. Users can search and filter examples, view each example's editable creative brief, and open the face-generation workflow with that brief prefilled.
+
 A dashboard should be present for the user to view and purchase credits
 
 A payments and billing page should be present. The application uses a credit based system, not a monthly subscription. The payment uses MPesa and the Kenyan shilling as the currency. The user can pay using an stk push, a paybill or a till number as well as by scanning a qr code. Card payment is also enabled as fallback.
@@ -46,7 +48,6 @@ Inlude a registration and login page that uses password based authentication but
 - As a fallback option implement payment by card
 
 - For the front end include a minimal landing page, with the hero section and a how it works section. Also include a register and login page as well as a dashboard page, payments and billing pages, a gallery of all the previous generations. Build out the product page which should include a multi-step form. For guidance, an image is provided, showing the landing page for a face generation website. Repurpose the face generation site for this product.
-
 
 
 

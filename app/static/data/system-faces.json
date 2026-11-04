@@ -1,0 +1,32 @@
+[
+  {
+    "id": "bright-creative",
+    "title": "The Bright Creative",
+    "image": "/images/cbc629e9-6ada-4e65-9b67-84670083949d.png",
+    "gender": "Man",
+    "age_range": "25-34",
+    "ethnicity": "Mixed heritage",
+    "description": "A cheerful young man with warm-brown skin, short dark curls, a broad natural smile, small hoop earrings, and a mustard-and-navy plaid shirt. Friendly, approachable energy; close-up portrait against a warm neutral studio backdrop with soft, even light.",
+    "style": "Warm & bright"
+  },
+  {
+    "id": "quiet-thinker",
+    "title": "The Quiet Thinker",
+    "image": "/images/bee88af0-dc2f-4155-8fab-36be59e1c2fd.png",
+    "gender": "Man",
+    "age_range": "25-34",
+    "ethnicity": "Mixed heritage",
+    "description": "A thoughtful young man with medium warm skin, voluminous dark curly hair, subtle stubble, and a charcoal crew-neck shirt. Calm, direct expression; centered studio headshot against a deep charcoal background with soft directional lighting.",
+    "style": "Classic studio"
+  },
+  {
+    "id": "editorial-original",
+    "title": "The Editorial Original",
+    "image": "/images/7ed7cf1e-5855-4c61-961c-a8cec3a0b015.png",
+    "gender": "Man",
+    "age_range": "25-34",
+    "ethnicity": "Mixed heritage",
+    "description": "A young man with warm medium-brown skin, dense natural curls, and a simple black crew-neck shirt. Composed, confident expression; tightly framed editorial portrait with dramatic side lighting and a pale studio background.",
+    "style": "Editorial contrast"
+  }
+]

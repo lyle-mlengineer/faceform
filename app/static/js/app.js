@@ -191,6 +191,19 @@
       }
     }
 
+    const starterParams = new URLSearchParams(window.location.search);
+    ["title", "gender", "age_range", "ethnicity", "description"].forEach((name) => {
+      const value = starterParams.get(name);
+      if (!value) return;
+      const field = form.elements[name];
+      if (field instanceof HTMLSelectElement && ![...field.options].some((option) => option.value === value)) return;
+      field.value = value;
+    });
+    if (starterParams.has("description")) {
+      countLabel.textContent = `${description.value.length} / 2000`;
+      imageCount.value = "1";
+    }
+
     form.querySelectorAll("[data-next-step]").forEach((button) => {
       button.addEventListener("click", () => {
         const current = Number(button.closest(".form-step").dataset.formStep);
@@ -292,6 +305,121 @@
     }
   }
 
+  async function mountSystemGallery() {
+    const grid = document.getElementById("system-gallery-grid");
+    if (!grid) return;
+    const search = document.getElementById("system-face-search");
+    const styleFilter = document.getElementById("system-face-style");
+    const genderFilter = document.getElementById("system-face-gender");
+    const ethnicityFilter = document.getElementById("system-face-ethnicity");
+    const count = document.getElementById("system-gallery-count");
+    const dialog = document.getElementById("system-face-modal");
+    const useButton = document.getElementById("use-system-face");
+    let faces = [];
+    let selectedFace = null;
+
+    const setFilterOptions = (select, values) => {
+      [...new Set(values)].sort().forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.append(option);
+      });
+    };
+
+    const openFace = (face) => {
+      selectedFace = face;
+      document.getElementById("system-face-title").textContent = face.title;
+      const preview = document.getElementById("system-face-image");
+      preview.src = face.image;
+      preview.alt = face.title;
+      document.getElementById("system-face-detail-gender").textContent = face.gender;
+      document.getElementById("system-face-detail-age").textContent = face.age_range;
+      document.getElementById("system-face-detail-ethnicity").textContent = face.ethnicity;
+      document.getElementById("system-face-detail-description").textContent = face.description;
+      dialog.showModal();
+    };
+
+    const render = () => {
+      const query = search.value.trim().toLowerCase();
+      const visibleFaces = faces.filter((face) => {
+        const matchesSearch = `${face.title} ${face.description} ${face.style} ${face.gender} ${face.age_range} ${face.ethnicity}`
+          .toLowerCase().includes(query);
+        return matchesSearch
+          && (!styleFilter.value || face.style === styleFilter.value)
+          && (!genderFilter.value || face.gender === genderFilter.value)
+          && (!ethnicityFilter.value || face.ethnicity === ethnicityFilter.value);
+      });
+      grid.replaceChildren();
+      count.textContent = `${visibleFaces.length} ${visibleFaces.length === 1 ? "starter face" : "starter faces"}`;
+      if (!visibleFaces.length) {
+        const empty = document.createElement("p");
+        empty.className = "loading-state";
+        empty.textContent = "No starter faces match those filters.";
+        grid.append(empty);
+        return;
+      }
+      visibleFaces.forEach((face) => {
+        const card = document.createElement("button");
+        card.className = "system-face-card";
+        card.type = "button";
+        card.setAttribute("aria-label", `View ${face.title} starter brief`);
+        const image = document.createElement("img");
+        image.src = face.image;
+        image.alt = "";
+        image.loading = "lazy";
+        const details = document.createElement("span");
+        details.className = "system-face-card-details";
+        const title = document.createElement("strong");
+        title.textContent = face.title;
+        const style = document.createElement("small");
+        style.textContent = face.style;
+        details.append(title, style);
+        card.append(image, details);
+        card.addEventListener("click", () => openFace(face));
+        grid.append(card);
+      });
+    };
+
+    document.querySelectorAll("[data-close-system-face]").forEach((button) => {
+      button.addEventListener("click", () => dialog.close());
+    });
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    useButton.addEventListener("click", () => {
+      if (!selectedFace) return;
+      const params = new URLSearchParams({
+        title: selectedFace.title,
+        gender: selectedFace.gender,
+        age_range: selectedFace.age_range,
+        ethnicity: selectedFace.ethnicity,
+        description: selectedFace.description,
+      });
+      window.location.href = `/product?${params}`;
+    });
+    [search, styleFilter, genderFilter, ethnicityFilter].forEach((control) => {
+      control.addEventListener(control === search ? "input" : "change", render);
+    });
+
+    try {
+      const response = await fetch("/static/data/system-faces.json");
+      if (!response.ok) throw new Error("Could not load the starter face gallery.");
+      faces = await response.json();
+      setFilterOptions(styleFilter, faces.map((face) => face.style));
+      setFilterOptions(genderFilter, faces.map((face) => face.gender));
+      setFilterOptions(ethnicityFilter, faces.map((face) => face.ethnicity));
+      render();
+    } catch (error) {
+      grid.replaceChildren();
+      const message = document.createElement("p");
+      message.className = "loading-state";
+      message.textContent = error.message;
+      grid.append(message);
+      toast(error.message, "error");
+    }
+  }
+
   async function mountDashboard() {
     if (!document.getElementById("welcome-name")) return;
     if (!requireAuth()) return;
@@ -363,7 +491,8 @@
       albumsContainer.innerHTML = `<button type="button" class="album-chip ${activeAlbum ? "" : "active"}" data-album-filter=""><span class="album-symbol">▦</span><span><strong>All faces</strong><small>${images.length} total</small></span></button>` +
         albums.map((album) => `<div class="album-chip ${activeAlbum === album.id ? "active" : ""}" data-album-id="${escapeHtml(album.id)}">
           <button type="button" class="album-filter-button" data-album-filter="${escapeHtml(album.id)}"><span class="album-symbol">▤</span><span><strong>${escapeHtml(album.title)}</strong><small>${album.image_count} ${album.image_count === 1 ? "face" : "faces"}</small></span></button>
-          <button type="button" class="album-menu" data-edit-album="${escapeHtml(album.id)}" aria-label="Edit album">···</button>
+          <button type="button" class="album-delete" data-delete-album="${escapeHtml(album.id)}" aria-label="Delete album ${escapeHtml(album.title)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v7m6-7v7"/></svg></button>
+          <button type="button" class="album-edit" data-edit-album="${escapeHtml(album.id)}" aria-label="Edit album ${escapeHtml(album.title)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 4 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/></svg></button>
         </div>`).join("");
     };
 
@@ -440,6 +569,16 @@
       }
       const edit = event.target.closest("[data-edit-album]");
       if (edit) openAlbumDialog(albums.find((album) => album.id === edit.dataset.editAlbum));
+      const remove = event.target.closest("[data-delete-album]");
+      if (remove) {
+        const album = albums.find((item) => item.id === remove.dataset.deleteAlbum);
+        if (album) {
+          const dialog = document.getElementById("delete-album-modal");
+          dialog.dataset.albumId = album.id;
+          document.getElementById("delete-album-name").textContent = album.title;
+          dialog.showModal();
+        }
+      }
     });
     grid.addEventListener("click", async (event) => {
       const download = event.target.closest("[data-download]");
@@ -596,6 +735,32 @@
         toast(id ? "Album updated." : "Album created.", "success");
       } catch (error) { toast(error.message, "error"); }
     });
+    const deleteAlbumDialog = document.getElementById("delete-album-modal");
+    deleteAlbumDialog.querySelectorAll("[data-close-delete-album]").forEach((button) => {
+      button.addEventListener("click", () => deleteAlbumDialog.close());
+    });
+    const confirmDeleteAlbum = document.getElementById("confirm-delete-album");
+    confirmDeleteAlbum.addEventListener("click", async () => {
+      const albumId = deleteAlbumDialog.dataset.albumId;
+      if (!albumId) return;
+      confirmDeleteAlbum.disabled = true;
+      try {
+        await api(`/albums/${encodeURIComponent(albumId)}`, { method: "DELETE" });
+        deleteAlbumDialog.close();
+        if (activeAlbum === albumId) {
+          activeAlbum = "";
+          document.getElementById("gallery-title").textContent = "All faces";
+          await loadImages();
+        }
+        albums = await api("/albums");
+        renderAlbums();
+        toast("Album deleted. Its faces remain in your gallery.", "success");
+      } catch (error) { toast(error.message, "error"); }
+      finally {
+        confirmDeleteAlbum.disabled = false;
+        delete deleteAlbumDialog.dataset.albumId;
+      }
+    });
   }
 
   function openAlbumDialog(album = null) {
@@ -606,24 +771,6 @@
     form.elements.title.value = album?.title || "";
     form.elements.description.value = album?.description || "";
     document.getElementById("album-modal-title").textContent = album ? "Edit album" : "New album";
-    let deleteButton = document.getElementById("delete-album");
-    if (deleteButton) deleteButton.remove();
-    if (album) {
-      deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.id = "delete-album";
-      deleteButton.className = "text-button";
-      deleteButton.textContent = "Delete album";
-      deleteButton.addEventListener("click", async () => {
-        if (!window.confirm(`Delete "${album.title}"? Your faces won't be deleted.`)) return;
-        try {
-          await api(`/albums/${encodeURIComponent(album.id)}`, { method: "DELETE" });
-          dialog.close();
-          window.location.reload();
-        } catch (error) { toast(error.message, "error"); }
-      });
-      form.querySelector(".modal-actions").prepend(deleteButton);
-    }
     dialog.showModal();
   }
 
@@ -789,6 +936,7 @@
     mountStudio();
     mountDashboard();
     mountGallery();
+    mountSystemGallery();
     mountBilling();
   });
 })();

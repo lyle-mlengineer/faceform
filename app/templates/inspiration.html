@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block body_class %}app-page inspiration-page{% endblock %}
+{% block content %}
+<header class="app-topbar">
+  <a class="wordmark" href="/">Faceform<span>.</span></a>
+  <nav class="app-top-links"><a href="/product">Create a face</a><a href="/gallery">My gallery</a><a href="/billing">Credits</a></nav>
+</header>
+<main id="main" class="inspiration-layout wrap">
+  <section class="inspiration-intro">
+    <span class="eyebrow">A little inspiration</span>
+    <h1>Find a <span class="accent">starting point.</span></h1>
+    <p>Explore sample faces, peek at their creative briefs, and make the idea your own.</p>
+    <p class="inspiration-note">These are editable starter briefs reconstructed for the sample images; the original prompts were not saved.</p>
+  </section>
+  <section class="system-gallery" aria-label="Starter face gallery">
+    <div class="system-gallery-controls">
+      <label class="search-box"><span>⌕</span><input id="system-face-search" type="search" placeholder="Search faces or briefs..." aria-label="Search starter faces"></label>
+      <select id="system-face-style" aria-label="Filter by style"><option value="">All styles</option></select>
+      <select id="system-face-gender" aria-label="Filter by gender presentation"><option value="">All gender presentations</option></select>
+      <select id="system-face-ethnicity" aria-label="Filter by ethnicity"><option value="">All ethnicities</option></select>
+    </div>
+    <p class="system-gallery-count" id="system-gallery-count" aria-live="polite"></p>
+    <div class="system-gallery-grid" id="system-gallery-grid"><p class="loading-state">Loading starter faces…</p></div>
+  </section>
+</main>
+<dialog class="modal system-face-modal" id="system-face-modal" aria-labelledby="system-face-title">
+  <div class="modal-heading"><div><span class="eyebrow">Starter face brief</span><h2 id="system-face-title"></h2></div><button class="icon-button" type="button" data-close-system-face aria-label="Close">×</button></div>
+  <div class="system-face-detail">
+    <img id="system-face-image" alt="">
+    <div>
+      <p class="system-face-notice">This is an editable starter brief, not the original generation history.</p>
+      <dl class="system-face-inputs">
+        <div><dt>Gender presentation</dt><dd id="system-face-detail-gender"></dd></div>
+        <div><dt>Age range</dt><dd id="system-face-detail-age"></dd></div>
+        <div><dt>Ethnicity</dt><dd id="system-face-detail-ethnicity"></dd></div>
+        <div><dt>Appearance and style</dt><dd id="system-face-detail-description"></dd></div>
+      </dl>
+      <button class="button button-primary" type="button" id="use-system-face">Use this brief <span>→</span></button>
+    </div>
+  </div>
+</dialog>
+{% endblock %}

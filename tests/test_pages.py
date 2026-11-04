@@ -30,6 +30,7 @@ def client() -> Iterator[TestClient]:
         ("/register", "Create your account."),
         ("/dashboard", "Your recent faces"),
         ("/gallery", "Your albums"),
+        ("/inspiration", "Explore sample faces"),
         ("/billing", "Credit packs"),
     ],
 )
@@ -43,10 +44,13 @@ def test_frontend_pages_render(client: TestClient, path: str, expected_text: str
 def test_static_assets_and_firebase_client_config(client: TestClient) -> None:
     css = client.get("/static/css/site.css")
     script = client.get("/static/js/app.js")
+    system_faces = client.get("/static/data/system-faces.json")
     auth_page = client.get("/register")
 
     assert css.status_code == 200
     assert "prefers-reduced-motion" in css.text
     assert script.status_code == 200
     assert "mountStudio" in script.text
+    assert system_faces.status_code == 200
+    assert len(system_faces.json()) == 3
     assert '"apiKey": "test-key"' in auth_page.text

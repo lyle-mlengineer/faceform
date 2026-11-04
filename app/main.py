@@ -100,6 +100,10 @@ def create_app(settings: Settings | None = None, database_url: str | None = None
     def gallery_page(request: Request):
         return render_page(request, "gallery.html", page_title="Your gallery")
 
+    @app.get("/inspiration", include_in_schema=False)
+    def inspiration_page(request: Request):
+        return render_page(request, "inspiration.html", page_title="Starter face gallery")
+
     @app.get("/billing", include_in_schema=False)
     def billing_page(request: Request):
         return render_page(request, "billing.html", page_title="Credits & billing")
