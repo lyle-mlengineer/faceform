@@ -146,16 +146,7 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .system-face-card-details { display: grid; gap: 5px; padding: 13px 15px; }
 .system-face-card-details strong { font-family: "Manrope", sans-serif; font-size: 13px; }
 .system-face-card-details small { color: #89848f; font-size: 10px; }
-.system-face-modal { width: min(820px, calc(100% - 30px)); }
 .system-face-modal .modal-heading { margin-bottom: 18px; }
-.system-face-detail { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: start; gap: 24px; }
-.system-face-detail > img { width: 100%; aspect-ratio: .9; border-radius: 13px; background: #efebf5; object-fit: cover; }
-.system-face-notice { margin-bottom: 15px; color: #8c8692; font-size: 10px; line-height: 1.55; }
-.system-face-inputs { display: grid; gap: 13px; margin-bottom: 19px; }
-.system-face-inputs > div { display: grid; gap: 4px; }
-.system-face-inputs dt { color: #8c8692; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.system-face-inputs dd { color: #4a4650; font-size: 11px; line-height: 1.6; }
-.system-face-modal .button { min-height: 42px; }
 .studio-layout { display: grid; grid-template-columns: minmax(220px, .75fr) minmax(0, 1.45fr); align-items: start; gap: clamp(34px, 8vw, 110px); padding-top: 68px; padding-bottom: 90px; }
 .studio-intro { position: sticky; top: 45px; padding-top: 5px; }
 .back-link { display: inline-flex; margin-bottom: 44px; color: #807c86; font-size: 11px; font-weight: 600; }
@@ -369,7 +360,20 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .billing-footnote { margin-top: 20px; color: #99949f; font-size: 9px; line-height: 1.6; }
 .modal { width: min(440px, calc(100% - 30px)); max-height: min(90vh, 760px); padding: 27px; border: 1px solid #eae7ed; border-radius: 19px; background: white; color: var(--ink); box-shadow: 0 25px 85px #30283b35; }
 .edit-face-modal { width: min(780px, calc(100% - 30px)); }
+.modal.system-face-modal { width: min(860px, calc(100vw - 32px)); max-height: min(88vh, 760px); padding: 32px; border-radius: 23px; overflow-y: auto; }
 .modal::backdrop { background: rgba(34,30,39,.42); backdrop-filter: blur(3px); }
+.system-face-modal .modal-heading { align-items: center; margin-bottom: 24px; }
+.system-face-modal .modal-heading h2 { font-size: 27px; }
+.system-face-detail { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: stretch; gap: 30px; }
+.system-face-detail > img { width: 100%; height: 100%; min-height: 390px; max-height: 480px; border-radius: 17px; background: #efebf5; object-fit: cover; }
+.system-face-detail > div { display: flex; flex-direction: column; min-width: 0; }
+.system-face-notice { margin-bottom: 17px; padding: 12px 14px; border: 1px solid #e9e2f5; border-radius: 11px; background: #f8f5fc; color: #77717f; font-size: 10px; line-height: 1.6; }
+.system-face-inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+.system-face-inputs > div { min-width: 0; padding: 12px 13px; border: 1px solid #efedf1; border-radius: 11px; background: #fff; }
+.system-face-inputs > div:last-child { grid-column: 1 / -1; background: #fbfafc; }
+.system-face-inputs dt { margin-bottom: 5px; color: #8c8692; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.system-face-inputs dd { color: #4a4650; font-size: 11px; line-height: 1.65; }
+.system-face-modal .button { width: 100%; min-height: 46px; margin-top: auto; }
 .modal form { display: grid; }
 .edit-face-layout form[hidden] { display: none; }
 .edit-face-layout { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 22px; }
@@ -462,9 +466,15 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
   .system-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .system-face-card-details { padding: 10px; }
   .system-face-card-details strong { font-size: 11px; }
-  .system-face-modal { padding: 20px; }
+  .modal.system-face-modal { width: min(600px, calc(100vw - 24px)); max-height: 92vh; padding: 20px; border-radius: 18px; }
+  .system-face-modal .modal-heading { margin-bottom: 17px; }
+  .system-face-modal .modal-heading h2 { font-size: 22px; }
   .system-face-detail { grid-template-columns: 1fr; gap: 15px; }
-  .system-face-detail > img { max-height: 260px; aspect-ratio: 1.35; }
+  .system-face-detail > img { height: auto; min-height: 0; max-height: 260px; aspect-ratio: 1.35; }
+  .system-face-notice { margin-bottom: 12px; }
+  .system-face-inputs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .system-face-inputs { gap: 8px; margin-bottom: 14px; }
+  .system-face-inputs > div { padding: 10px; }
   .auth-page { padding: 20px; }
   .auth-layout { grid-template-columns: .8fr 1fr; gap: 28px; padding-top: 28px; }
   .auth-art { min-height: 490px; padding: 26px; }
