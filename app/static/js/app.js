@@ -352,7 +352,7 @@
               <a href="${window.FACEFORM.apiBase}/images/${encodeURIComponent(image.id)}/download" data-download="${escapeHtml(image.id)}">Download</a>
               <button type="button" data-rename="${escapeHtml(image.id)}">Edit</button>
               <button type="button" data-assign="${escapeHtml(image.id)}" aria-label="Add to album">Album</button>
-              <button class="danger-action" type="button" data-delete-image="${escapeHtml(image.id)}" aria-label="Delete face">×</button>
+              <button class="danger-action" type="button" data-delete-image="${escapeHtml(image.id)}">Delete</button>
             </div>
           </div>
         </article>`).join("") : `<div class="empty-state"><span class="empty-symbol">✧</span><strong>${search ? "No faces found." : activeAlbum ? "This album is ready for faces." : "Your gallery is a blank canvas."}</strong><p>${search ? "Try another search, or clear the search box." : "Create your first original character and collect it here."}</p>${!activeAlbum && !search ? '<a class="button button-primary" href="/product">Create a face <span>→</span></a>' : ""}</div>`;
@@ -418,30 +418,81 @@
           toast("Create an album first to organize this face.");
           return;
         }
-        const choices = albums.map((album, index) => `${index + 1}. ${album.title}`).join("\n");
-        const chosen = Number(window.prompt(`Add to which album? Enter a number:\n${choices}`));
-        if (!Number.isInteger(chosen) || chosen < 1 || chosen > albums.length) return;
-        try {
-          await api(`/albums/${encodeURIComponent(albums[chosen - 1].id)}/images/${encodeURIComponent(assign.dataset.assign)}`, { method: "POST" });
-          albums = await api("/albums");
-          renderAlbums();
-          toast("Face added to your album.", "success");
-        } catch (error) { toast(error.message, "error"); }
+        const dialog = document.getElementById("assign-image-modal");
+        const albumSelect = document.getElementById("assign-image-album");
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select an album";
+        placeholder.disabled = true;
+        albumSelect.replaceChildren(placeholder);
+        albums.forEach((album) => {
+          const option = document.createElement("option");
+          option.value = album.id;
+          option.textContent = album.title;
+          albumSelect.append(option);
+        });
+        albumSelect.value = albums.some((album) => album.id === activeAlbum) ? activeAlbum : "";
+        dialog.dataset.imageId = assign.dataset.assign;
+        dialog.showModal();
         return;
       }
       const remove = event.target.closest("[data-delete-image]");
-      if (remove && window.confirm("Delete this face from your gallery?")) {
-        try {
-          await api(`/images/${encodeURIComponent(remove.dataset.deleteImage)}`, { method: "DELETE" });
-          await loadImages();
-          albums = await api("/albums");
-          renderAlbums();
-          toast("Face deleted.", "success");
-        } catch (error) { toast(error.message, "error"); }
+      if (remove) {
+        document.getElementById("delete-image-modal").dataset.imageId = remove.dataset.deleteImage;
+        document.getElementById("delete-image-modal").showModal();
+      }
+    });
+
+    const deleteImageDialog = document.getElementById("delete-image-modal");
+    const confirmDeleteImage = document.getElementById("confirm-delete-image");
+    confirmDeleteImage.addEventListener("click", async () => {
+      const imageId = deleteImageDialog.dataset.imageId;
+      if (!imageId) return;
+      confirmDeleteImage.disabled = true;
+      try {
+        await api(`/images/${encodeURIComponent(imageId)}`, { method: "DELETE" });
+        deleteImageDialog.close();
+        await loadImages();
+        albums = await api("/albums");
+        renderAlbums();
+        toast("Face deleted.", "success");
+      } catch (error) { toast(error.message, "error"); }
+      finally {
+        confirmDeleteImage.disabled = false;
+        delete deleteImageDialog.dataset.imageId;
+      }
+    });
+
+    const assignImageDialog = document.getElementById("assign-image-modal");
+    const assignImageForm = document.getElementById("assign-image-form");
+    const confirmAssignImage = document.getElementById("confirm-assign-image");
+    assignImageDialog.querySelectorAll("[data-close-assign]").forEach((button) => {
+      button.addEventListener("click", () => assignImageDialog.close());
+    });
+    assignImageForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const imageId = assignImageDialog.dataset.imageId;
+      const albumId = new FormData(assignImageForm).get("album_id");
+      if (!imageId || typeof albumId !== "string" || !albumId) return;
+      confirmAssignImage.disabled = true;
+      try {
+        await api(`/albums/${encodeURIComponent(albumId)}/images/${encodeURIComponent(imageId)}`, { method: "POST" });
+        assignImageDialog.close();
+        albums = await api("/albums");
+        renderAlbums();
+        toast("Face added to your album.", "success");
+      } catch (error) { toast(error.message, "error"); }
+      finally {
+        confirmAssignImage.disabled = false;
+        delete assignImageDialog.dataset.imageId;
       }
     });
 
     document.querySelectorAll("[data-create-album]").forEach((button) => button.addEventListener("click", () => openAlbumDialog()));
+    const albumDialog = document.getElementById("album-modal");
+    albumDialog.querySelectorAll("[data-close-album]").forEach((button) => {
+      button.addEventListener("click", () => albumDialog.close());
+    });
     const albumForm = document.getElementById("album-form");
     albumForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -453,7 +504,7 @@
           method: id ? "PATCH" : "POST",
           body: JSON.stringify(payload),
         });
-        document.getElementById("album-modal").close();
+        albumDialog.close();
         albums = await api("/albums");
         renderAlbums();
         toast(id ? "Album updated." : "Album created.", "success");
