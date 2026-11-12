@@ -8,12 +8,18 @@ from app.main import create_app
 from app.providers import ProviderRequestError
 
 
-@pytest.fixture
-def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
-    async def fake_generate_images(settings: Settings, prompt: str, count: int) -> list[str]:
-        return [f"https://images.example.test/{index}.png" for index in range(count)]
+class StubImageProvider:
+    def __init__(self, error: Exception | None = None) -> None:
+        self.error = error
 
-    monkeypatch.setattr("app.api.generate_images", fake_generate_images)
+    async def generate_images(self, prompt: str, count: int) -> list[str]:
+        if self.error:
+            raise self.error
+        return [f"{index}.png" for index in range(count)]
+
+
+@pytest.fixture
+def client() -> Iterator[TestClient]:
     settings = Settings(
         _env_file=None,
         jwt_secret="test-secret-that-is-long-enough-for-local-tests",
@@ -26,6 +32,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
         payment_webhook_secret="webhook-secret",
     )
     application = create_app(settings, database_url="sqlite:///:memory:")
+    application.state.image_provider = StubImageProvider()
     with TestClient(application) as test_client:
         yield test_client
 
@@ -84,7 +91,7 @@ def test_guest_can_generate_once_and_claim_generation(client: TestClient) -> Non
         follow_redirects=False,
     )
     assert download.status_code == 307
-    assert download.headers["location"] == "https://images.example.test/0.png"
+    assert download.headers["location"] == "http://testserver/images/0.png"
 
 
 def test_manual_mpesa_payment_is_idempotent_and_generation_debits_credits(client: TestClient) -> None:
@@ -193,11 +200,8 @@ def test_credit_checks_can_be_disabled_only_in_development(client: TestClient) -
     assert client.get("/api/v1/dashboard", headers=headers).json()["credit_checks_disabled"] is False
 
 
-def test_failed_generation_refunds_credits(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
-    async def failing_generator(settings: Settings, prompt: str, count: int) -> list[str]:
-        raise ProviderRequestError("Provider unavailable")
-
-    monkeypatch.setattr("app.api.generate_images", failing_generator)
+def test_failed_generation_refunds_credits(client: TestClient) -> None:
+    client.app.state.image_provider = StubImageProvider(ProviderRequestError("Provider unavailable"))
     account = register(client)
     headers = {"Authorization": f"Bearer {account['access_token']}"}
     created = client.post(
